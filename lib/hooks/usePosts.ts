@@ -8,6 +8,10 @@ export type Post = {
   id: string
   title: string
   body: string
+  slug: string
+  category?: string
+  tags?: string[]
+  thumbnailUrl?: string
   createdAt: { seconds: number } // Firestore Timestamp型
 }
 

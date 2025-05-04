@@ -2,123 +2,120 @@
 
 import { useState } from 'react'
 import { db } from '@/lib/firebase'
-import { collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc, Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 
-export default function NewSchoolPage() {
+export default function NewBlogPostPage() {
   const router = useRouter()
   const [form, setForm] = useState({
-    name: '',
-    price: '',
-    freeTrial: false,
-    features: [''],
-    officialUrl: '',
-    imageUrl: '',
-    recommended: false,
+    title: '',
+    body: '',
+    category: '',
+    tags: [''],
+    thumbnailUrl: '',
   })
 
+  // slug を自動生成する関数
+  const generateSlug = (title: string) => {
+    return title
+      .trim()
+      .toLowerCase()
+      .replace(/[\s　]/g, '-')
+      .replace(/[^\w-]/g, '')
+  }
+
+  // 入力変更ハンドラー
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const target = e.target as HTMLInputElement
-    const { name, value, type, checked } = target
-    const newValue = type === 'checkbox' ? checked : value
-    setForm((prev) => ({ ...prev, [name]: newValue }))
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleFeatureChange = (index: number, value: string) => {
-    const updated = [...form.features]
+  // タグの変更ハンドラー
+  const handleTagChange = (index: number, value: string) => {
+    const updated = [...form.tags]
     updated[index] = value
-    setForm((prev) => ({ ...prev, features: updated }))
+    setForm((prev) => ({ ...prev, tags: updated }))
   }
 
-  const addFeature = () =>
-    setForm((prev) => ({ ...prev, features: [...prev.features, ''] }))
-  const removeFeature = (index: number) =>
+  // タグ追加
+  const addTag = () =>
+    setForm((prev) => ({ ...prev, tags: [...prev.tags, ''] }))
+
+  // タグ削除
+  const removeTag = (index: number) =>
     setForm((prev) => ({
       ...prev,
-      features: prev.features.filter((_, i) => i !== index),
+      tags: prev.tags.filter((_, i) => i !== index),
     }))
 
+  // フォーム送信処理
   const handleSubmit = async () => {
-    await addDoc(collection(db, 'schools'), form)
-    alert('スクールを追加しました')
-    router.push('/admin/schools')
+    if (!form.title || !form.body) {
+      alert('タイトルと本文は必須です')
+      return
+    }
+
+    // Firestore にデータ追加
+    await addDoc(collection(db, 'posts'), {
+      ...form,
+      slug: generateSlug(form.title), // slug を自動生成
+      createdAt: Timestamp.now(), // createdAt はサーバータイムスタンプ
+    })
+    alert('記事を追加しました')
+    router.push('/admin/blog')
   }
 
   return (
     <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">スクールの追加</h1>
+      <h1 className="text-2xl font-bold mb-4">記事の追加</h1>
 
       <input
-        name="name"
-        value={form.name}
+        name="title"
+        value={form.title}
         onChange={handleChange}
-        placeholder="スクール名"
+        placeholder="タイトル"
         className="w-full border p-2 mb-3 rounded"
       />
 
       <input
-        name="price"
-        value={form.price}
+        name="category"
+        value={form.category}
         onChange={handleChange}
-        placeholder="料金"
+        placeholder="カテゴリ"
         className="w-full border p-2 mb-3 rounded"
+      />
+
+      <textarea
+        name="body"
+        value={form.body}
+        onChange={handleChange}
+        placeholder="本文（Markdown）"
+        className="w-full border p-2 mb-3 rounded h-40"
       />
 
       <input
-        name="officialUrl"
-        value={form.officialUrl}
+        name="thumbnailUrl"
+        value={form.thumbnailUrl}
         onChange={handleChange}
-        placeholder="公式URL"
+        placeholder="サムネ画像URL（任意）"
         className="w-full border p-2 mb-3 rounded"
       />
 
-      <input
-        name="imageUrl"
-        value={form.imageUrl}
-        onChange={handleChange}
-        placeholder="画像URL（任意）"
-        className="w-full border p-2 mb-3 rounded"
-      />
-
-      <label className="block mb-2">
-        <input
-          type="checkbox"
-          name="freeTrial"
-          checked={form.freeTrial}
-          onChange={handleChange}
-          className="mr-2"
-        />
-        無料体験あり
-      </label>
-
-      <label className="block mb-4">
-        <input
-          type="checkbox"
-          name="recommended"
-          checked={form.recommended}
-          onChange={handleChange}
-          className="mr-2"
-        />
-        おすすめに表示
-      </label>
-
-      <div className="mb-4">
-        <p className="font-semibold">特徴</p>
-        {form.features.map((feature, i) => (
+      <div className="mb-3">
+        <p className="font-semibold">タグ</p>
+        {form.tags.map((tag, i) => (
           <div key={i} className="flex gap-2 mt-1">
             <input
               type="text"
-              value={feature}
-              onChange={(e) => handleFeatureChange(i, e.target.value)}
+              value={tag}
+              onChange={(e) => handleTagChange(i, e.target.value)}
               className="border p-1 flex-1 rounded"
             />
             <button
               type="button"
-              onClick={() => removeFeature(i)}
+              onClick={() => removeTag(i)}
               className="text-red-500 text-sm"
             >
               削除
@@ -126,11 +123,11 @@ export default function NewSchoolPage() {
           </div>
         ))}
         <button
-          onClick={addFeature}
+          onClick={addTag}
           type="button"
           className="mt-2 text-blue-500 text-sm"
         >
-          ＋特徴を追加
+          ＋タグを追加
         </button>
       </div>
 
@@ -138,7 +135,7 @@ export default function NewSchoolPage() {
         onClick={handleSubmit}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
-        登録する
+        投稿する
       </button>
     </main>
   )

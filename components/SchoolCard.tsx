@@ -1,4 +1,4 @@
-import { School } from '@/lib/hooks/useSchools'
+import type { School } from '@/types/school'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -30,7 +30,9 @@ export default function SchoolCard({ school }: Props) {
 
       <ul className="list-disc ml-5 text-sm text-gray-700 mb-2">
         {school.features.length > 0 ? (
-          school.features.map((f, idx) => <li key={idx}>{f}</li>)
+          school.features.map((f: string, idx: number) => (
+            <li key={idx}>{f}</li>
+          ))
         ) : (
           <li className="text-gray-400 italic">特徴情報は準備中です</li>
         )}
@@ -42,7 +44,7 @@ export default function SchoolCard({ school }: Props) {
       </div>
 
       <Link
-        href={`/school/${school.id}`}
+        href={`/school/${school.slug}`}
         className="mt-4 inline-block text-center border border-blue-500 text-blue-600 px-4 py-1 rounded hover:bg-blue-50 transition"
       >
         詳しく見る

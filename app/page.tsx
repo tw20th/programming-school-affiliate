@@ -1,15 +1,11 @@
-// app/page.tsx
-
-'use client'
-
-import { useSchools } from '@/lib/hooks/useSchools'
+import { getSchools } from '@/lib/firestore/getSchools'
 import SchoolCard from '@/components/SchoolCard'
 
-export default function HomePage() {
-  const { schools, loading } = useSchools()
-  const featured = schools.filter((school) => school.featured)
+export const revalidate = 60 // ← ISR対応：60秒ごとに再生成
 
-  if (loading) return <p className="p-4">読み込み中...</p>
+export default async function HomePage() {
+  const schools = await getSchools()
+  const featured = schools.filter((school) => school.featured)
 
   return (
     <main className="max-w-6xl mx-auto p-6">

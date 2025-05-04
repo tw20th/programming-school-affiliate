@@ -7,11 +7,20 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
 type Post = {
   title: string
+  slug: string
   body: string
   category: string
   tags: string[]
   thumbnailUrl?: string
 }
+
+// slugify関数：日本語→URL用のスラッグに変換
+const slugify = (str: string) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
 
 export default function EditPostPage() {
   const { id } = useParams()
@@ -19,23 +28,42 @@ export default function EditPostPage() {
 
   const [form, setForm] = useState<Post>({
     title: '',
+    slug: '',
     body: '',
     category: '',
     tags: [],
     thumbnailUrl: '',
   })
 
+  // Firestoreから記事を取得し、slug補正
   useEffect(() => {
     if (!id) return
     const fetch = async () => {
       const ref = doc(db, 'posts', id as string)
       const snap = await getDoc(ref)
       if (snap.exists()) {
-        setForm(snap.data() as Post)
+        const data = snap.data() as Post
+        const validSlug =
+          !data.slug || data.slug === '5' || data.slug.length < 3
+        const generatedSlug = slugify(data.title)
+        setForm({
+          ...data,
+          slug: validSlug ? generatedSlug : data.slug,
+        })
       }
     }
     fetch()
   }, [id])
+
+  // slugが空なら自動補完（依存に form.slug を追加して ESLint対応）
+  useEffect(() => {
+    if (form.title && form.slug.trim() === '') {
+      setForm((prev) => ({
+        ...prev,
+        slug: slugify(prev.title),
+      }))
+    }
+  }, [form.title, form.slug])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -74,6 +102,16 @@ export default function EditPostPage() {
         <input
           name="title"
           value={form.title}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mt-1"
+        />
+      </label>
+
+      <label className="block mb-2">
+        スラッグ（URL）※自動候補が入力されますが、自由に編集できます
+        <input
+          name="slug"
+          value={form.slug}
           onChange={handleChange}
           className="w-full border p-2 rounded mt-1"
         />

@@ -1,6 +1,6 @@
 'use client'
 
-import PostList from '@/components/PostList'
+import PostList from '@/components/blog/PostList'
 import { usePosts } from '@/lib/hooks/usePosts'
 
 export default function BlogPage() {

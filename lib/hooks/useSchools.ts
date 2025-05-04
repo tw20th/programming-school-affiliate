@@ -3,21 +3,7 @@
 import { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
-
-export type School = {
-  id: string
-  name: string
-  features: string[]
-  price: string
-  freeTrial: boolean
-  officialUrl: string
-  imageUrl?: string
-  featured?: boolean
-  recommended?: boolean // ← これを追加
-  isSideJob?: boolean
-  isCareerChange?: boolean
-  description?: string
-}
+import type { School } from '@/types/school'
 
 export const useSchools = () => {
   const [schools, setSchools] = useState<School[]>([])
