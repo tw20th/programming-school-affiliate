@@ -1,5 +1,3 @@
-// app/school/[slug]/page.tsx
-
 import { getSchools, getSchoolBySlug } from '@/lib/firestore/getSchools'
 import { ReviewForm } from '@/components/ReviewForm'
 import { ReviewList } from '@/components/ReviewList'
@@ -8,30 +6,54 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
+type Props = { params: { slug: string } }
+
 // 🔹 静的パス生成（SSG対応）
 export async function generateStaticParams() {
   const schools = await getSchools()
   return schools.map((school) => ({ slug: school.slug }))
 }
 
-// 🔹 SEO用の動的メタデータ生成
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
-}): Promise<Metadata> {
+// 🔹 SEO用の動的メタデータ生成（OGP付き）
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const school = await getSchoolBySlug(params.slug)
+
+  if (!school) {
+    return { title: 'スクールが見つかりません' }
+  }
+
+  const siteUrl = 'https://yourdomain.com' // ← あなたのドメインに変更！
+
   return {
-    title: `${school?.name} | プログラミングスクール比較`,
-    description: school?.description ?? 'おすすめスクールの詳細ページです。',
+    title: `${school.name} | プログラミングスクール比較`,
+    description: school.description ?? 'おすすめスクールの詳細ページです。',
+    openGraph: {
+      title: school.name,
+      description: school.description ?? '',
+      url: `${siteUrl}/school/${params.slug}`,
+      type: 'article',
+      images: school.imageUrl
+        ? [
+            {
+              url: school.imageUrl,
+              width: 800,
+              height: 420,
+              alt: school.name,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: school.name,
+      description: school.description ?? '',
+      images: school.imageUrl ? [school.imageUrl] : [],
+    },
   }
 }
 
-export default async function SchoolDetailPage({
-  params,
-}: {
-  params: { slug: string }
-}) {
+// 🔹 ページ本体
+export default async function SchoolDetailPage({ params }: Props) {
   const school = await getSchoolBySlug(params.slug)
   if (!school) return <p className="p-4">スクールが見つかりませんでした。</p>
 
@@ -76,6 +98,36 @@ export default async function SchoolDetailPage({
       >
         公式サイトへ
       </Link>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: school.name,
+            description: school.description,
+            image: school.imageUrl,
+            offers: {
+              '@type': 'Offer',
+              price: school.price?.replace(/[^\d]/g, '') || '0',
+              priceCurrency: 'JPY',
+              url: `https://yourdomain.com/school/${params.slug}`,
+            },
+            review: reviews.map((review) => ({
+              '@type': 'Review',
+              reviewRating: {
+                '@type': 'Rating',
+                ratingValue: review.rating,
+                bestRating: '5',
+              },
+              author: {
+                '@type': 'Person',
+                name: review.author ?? '匿名',
+              },
+            })),
+          }),
+        }}
+      />
     </main>
   )
 }

@@ -1,51 +1,55 @@
-import type { School } from '@/types/school'
-import Link from 'next/link'
+// components/review/SchoolCard.tsx
 import Image from 'next/image'
+import Link from 'next/link'
+import { School } from '@/types/school'
 
 type Props = {
   school: School
 }
 
 export default function SchoolCard({ school }: Props) {
-  const imageUrl = school.imageUrl || '/no-image.png' // ✅ 空ならダミー画像に差し替え
-
   return (
-    <div className="border rounded-xl p-5 shadow hover:shadow-lg transition bg-white flex flex-col">
-      <Image
-        src={imageUrl}
-        alt={school.name}
-        width={200}
-        height={60}
-        className="mb-4 object-contain"
-      />
-
-      <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-        {school.name}
+    <div className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white flex flex-col justify-between h-full">
+      {/* ロゴ＋バッジ */}
+      <div className="flex items-center justify-between mb-4">
+        {school.imageUrl && (
+          <Image
+            src={school.imageUrl}
+            alt={school.name}
+            width={120}
+            height={40}
+            className="object-contain h-10"
+          />
+        )}
         {school.featured && (
-          <span className="text-xs bg-yellow-400 text-white px-2 py-0.5 rounded">
+          <span className="bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded">
             おすすめ
           </span>
         )}
+      </div>
+
+      {/* タイトル */}
+      <h2 className="text-lg font-semibold text-gray-800 mb-2">
+        {school.name}
       </h2>
 
-      <ul className="list-disc ml-5 text-sm text-gray-700 mb-2">
-        {school.features.length > 0 ? (
-          school.features.map((f: string, idx: number) => (
-            <li key={idx}>{f}</li>
-          ))
-        ) : (
-          <li className="text-gray-400 italic">特徴情報は準備中です</li>
-        )}
+      {/* 特徴 */}
+      <ul className="text-sm text-gray-700 space-y-1 mb-4 list-disc list-inside">
+        {school.features.map((feature, idx) => (
+          <li key={idx}>{feature}</li>
+        ))}
       </ul>
 
-      <div className="text-sm text-gray-600 mt-auto">
-        <p className="mb-1">💰 料金: {school.price}</p>
+      {/* 詳細情報 */}
+      <div className="text-sm text-gray-600 space-y-1 mb-4">
+        <p>💰 料金: {school.price}</p>
         <p>🎁 無料体験: {school.freeTrial ? 'あり' : 'なし'}</p>
       </div>
 
+      {/* CTA */}
       <Link
         href={`/school/${school.slug}`}
-        className="mt-4 inline-block text-center border border-blue-500 text-blue-600 px-4 py-1 rounded hover:bg-blue-50 transition"
+        className="mt-auto text-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition font-medium"
       >
         詳しく見る
       </Link>

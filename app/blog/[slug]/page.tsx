@@ -1,7 +1,5 @@
-// app/blog/[slug]/page.tsx
-
 import { getPostBySlug } from '@/lib/firestore/getPostBySlug'
-import { getAllSlugs } from '@/lib/firestore/getAllSlugs' // ★追加
+import { getAllSlugs } from '@/lib/firestore/getAllSlugs'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import { notFound } from 'next/navigation'
@@ -17,12 +15,14 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }))
 }
 
-// ✅ SEOメタ情報
+// ✅ SEOメタ情報（OGP対応付き）
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug)
   if (!post) {
     return { title: '記事が見つかりません' }
   }
+
+  const siteUrl = 'https://yourdomain.com' // ← あなたのドメインに変更！
 
   return {
     title: `${post.title} | プログラミングスクール比較ブログ`,
@@ -30,7 +30,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: post.title,
       description: post.body?.slice(0, 80),
-      images: post.thumbnailUrl ? [{ url: post.thumbnailUrl }] : [],
+      url: `${siteUrl}/blog/${params.slug}`,
+      type: 'article',
+      images: post.thumbnailUrl
+        ? [
+            {
+              url: post.thumbnailUrl,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.body?.slice(0, 80),
+      images: post.thumbnailUrl ? [post.thumbnailUrl] : [],
     },
   }
 }
@@ -65,6 +82,33 @@ export default async function BlogBySlugPage({ params }: Props) {
       <div className="prose max-w-none prose-blue">
         <ReactMarkdown>{post.body}</ReactMarkdown>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: post.title,
+            description: post.body?.slice(0, 80) ?? '',
+            image: post.thumbnailUrl ? [post.thumbnailUrl] : [],
+            author: {
+              '@type': 'Person',
+              name: '管理人',
+            },
+            datePublished: new Date(
+              post.createdAt.seconds * 1000
+            ).toISOString(),
+            publisher: {
+              '@type': 'Organization',
+              name: 'プログラミングスクール比較ブログ',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://yourdomain.com/logo.png', // あれば
+              },
+            },
+          }),
+        }}
+      />
     </main>
   )
 }
