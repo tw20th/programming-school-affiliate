@@ -62,13 +62,41 @@ export default async function BlogBySlugPage({ params }: Props) {
       <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
 
       {post.thumbnailUrl && (
-        <Image
-          src={post.thumbnailUrl}
-          alt="thumbnail"
-          width={800}
-          height={450}
-          className="rounded mb-4"
-        />
+        <>
+          <Image
+            src={
+              post.thumbnailUrl?.includes('source.unsplash.com')
+                ? '/no-image.png'
+                : post.thumbnailUrl
+            }
+            alt="thumbnail"
+            width={800}
+            height={450}
+            className="rounded mb-2"
+          />
+          {post.thumbnailAttribution && (
+            <p className="text-sm text-gray-500 mb-4">
+              Photo by{' '}
+              <a
+                href={post.thumbnailAttribution.photographer_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                {post.thumbnailAttribution.photographer}
+              </a>{' '}
+              on{' '}
+              <a
+                href="https://unsplash.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Unsplash
+              </a>
+            </p>
+          )}
+        </>
       )}
 
       <p className="text-sm text-gray-500 mb-1">カテゴリ: {post.category}</p>

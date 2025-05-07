@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { db } from '@/lib/firebase'
-import { collection, addDoc, Timestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
+import { useAddPost } from '@/lib/hooks/useAddPost'
 
 export default function NewBlogPostPage() {
   const router = useRouter()
+  const { addPost } = useAddPost()
+
   const [form, setForm] = useState({
     title: '',
     body: '',
@@ -30,6 +31,7 @@ export default function NewBlogPostPage() {
 
   const addTag = () =>
     setForm((prev) => ({ ...prev, tags: [...prev.tags, ''] }))
+
   const removeTag = (index: number) =>
     setForm((prev) => ({
       ...prev,
@@ -37,10 +39,14 @@ export default function NewBlogPostPage() {
     }))
 
   const handleSubmit = async () => {
-    await addDoc(collection(db, 'posts'), {
-      ...form,
-      createdAt: Timestamp.now(),
+    await addPost({
+      title: form.title,
+      body: form.body,
+      category: form.category,
+      tags: form.tags.filter((t) => t.trim() !== ''),
+      thumbnailUrl: form.thumbnailUrl, // 空欄なら自動取得される
     })
+
     alert('記事を追加しました')
     router.push('/admin/blog')
   }

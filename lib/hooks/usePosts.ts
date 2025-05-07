@@ -15,7 +15,8 @@ export type Post = {
   createdAt: { seconds: number } // Firestore Timestamp型
 }
 
-export function usePosts() {
+// 👇 usePosts を明示的に export
+export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
 
