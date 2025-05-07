@@ -9,7 +9,6 @@ export default function NewPostPage() {
   const [body, setBody] = useState('')
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState('')
-  const [thumbnailUrl, setThumbnailUrl] = useState('')
 
   const { addPost } = useAddPost()
   const router = useRouter()
@@ -23,7 +22,6 @@ export default function NewPostPage() {
       body,
       category,
       tags: tags.split(',').map((tag) => tag.trim()),
-      thumbnailUrl,
     })
 
     router.push('/blog')
@@ -41,11 +39,6 @@ export default function NewPostPage() {
         />
         <Input label="カテゴリ" value={category} setValue={setCategory} />
         <Input label="タグ（カンマ区切り）" value={tags} setValue={setTags} />
-        <Input
-          label="サムネ画像URL"
-          value={thumbnailUrl}
-          setValue={setThumbnailUrl}
-        />
         <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           投稿する
         </button>

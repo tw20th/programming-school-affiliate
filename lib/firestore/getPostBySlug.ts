@@ -1,10 +1,25 @@
-import { db } from '@/lib/firebase'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import type { Post } from '@/lib/hooks/usePosts'
+import { db } from '../firebase'
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import type { Post } from '@/types/post'
 
 export const getPostBySlug = async (slug: string): Promise<Post | null> => {
   const q = query(collection(db, 'posts'), where('slug', '==', slug))
   const snapshot = await getDocs(q)
+
   if (snapshot.empty) return null
-  return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Post
+
+  const doc = snapshot.docs[0]
+  const data = doc.data()
+
+  return {
+    id: doc.id,
+    title: data.title,
+    body: data.body,
+    slug: data.slug,
+    category: data.category,
+    tags: data.tags,
+    thumbnailUrl: data.thumbnailUrl,
+    thumbnailAttribution: data.thumbnailAttribution ?? null,
+    createdAt: data.createdAt,
+  }
 }
