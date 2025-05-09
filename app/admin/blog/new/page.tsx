@@ -6,7 +6,7 @@ import { useAddPost } from '@/lib/hooks/useAddPost'
 
 export default function NewBlogPostPage() {
   const router = useRouter()
-  const { addPost } = useAddPost()
+  const { addManualPost } = useAddPost()
 
   const [form, setForm] = useState({
     title: '',
@@ -39,7 +39,7 @@ export default function NewBlogPostPage() {
     }))
 
   const handleSubmit = async () => {
-    await addPost({
+    await addManualPost({
       title: form.title,
       body: form.body,
       category: form.category,
