@@ -1,11 +1,22 @@
-'use client'
-
 import { db } from '@/lib/firebase'
 import { addDoc, collection, Timestamp } from 'firebase/firestore'
-import { fetchImageByKeyword } from '@/lib/unsplash/fetchImageByKeyword'
+import type { FullPostType } from '@/types/post'
 
 export function useAddPost() {
-  const addPost = async ({
+  const addAutoPost = async (fullPost: FullPostType) => {
+    const now = new Date()
+    const scheduled = new Date(now.getTime() + 24 * 60 * 60 * 1000) // 24時間後
+    const publishedAt = Timestamp.fromDate(scheduled)
+    const createdAt = Timestamp.fromDate(now)
+
+    await addDoc(collection(db, 'posts'), {
+      ...fullPost,
+      createdAt,
+      publishedAt,
+    })
+  }
+
+  const addManualPost = async ({
     title,
     body,
     category,
@@ -18,40 +29,17 @@ export function useAddPost() {
     tags: string[]
     thumbnailUrl?: string
   }) => {
-    const useAutoFetch = !thumbnailUrl?.trim()
-
-    const image = useAutoFetch
-      ? await fetchImageByKeyword(`${title} ${category} ${tags.join(' ')}`)
-      : null
-
-    console.log('🔍 自動取得実行:', useAutoFetch)
-    console.log('🟢 取得した画像:', image)
-
-    if (useAutoFetch) {
-      if (image?.url) {
-        console.log('✅ 画像自動取得成功:', image.url)
-      } else {
-        console.warn('⚠️ 画像が見つかりませんでした')
-      }
-    }
-
-    const postsRef = collection(db, 'posts')
-    await addDoc(postsRef, {
+    const now = new Date()
+    await addDoc(collection(db, 'posts'), {
       title,
       body,
       category,
       tags,
-      thumbnailUrl: useAutoFetch ? image?.url || '' : thumbnailUrl,
-      thumbnailAttribution:
-        useAutoFetch && image
-          ? {
-              photographer: image.photographer,
-              photographer_url: image.photographer_url,
-            }
-          : null,
-      createdAt: Timestamp.now(),
+      thumbnailUrl: thumbnailUrl ?? '',
+      createdAt: Timestamp.fromDate(now),
+      publishedAt: Timestamp.fromDate(now),
     })
   }
 
-  return { addPost }
+  return { addAutoPost, addManualPost }
 }

@@ -10,14 +10,14 @@ export default function NewPostPage() {
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState('')
 
-  const { addPost } = useAddPost()
+  const { addManualPost } = useAddPost()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title || !body) return
 
-    await addPost({
+    await addManualPost({
       title,
       body,
       category,

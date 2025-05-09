@@ -57,8 +57,21 @@ export default async function BlogBySlugPage({ params }: Props) {
   const post = await getPostBySlug(params.slug)
   if (!post) return notFound()
 
+  // 🔽 ここが追加部分：未来の投稿は非表示に
+  if (
+    post.publishedAt?.seconds &&
+    post.publishedAt.seconds * 1000 > Date.now()
+  ) {
+    return (
+      <p className="text-center text-gray-500 mt-10">
+        この記事はまだ公開されていません。
+      </p>
+    )
+  }
+
   return (
     <main className="max-w-2xl mx-auto p-6">
+      {/* 以下はそのままでOK */}
       <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
 
       {post.thumbnailUrl && (
