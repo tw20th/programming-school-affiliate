@@ -2,19 +2,12 @@
 
 'use server'
 import { OpenAI } from 'openai'
+import { parseGeneratedPost } from './parseGeneratedPost'
+import { GeneratedPost } from '@/types/post'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-
-export type GeneratedPost = {
-  title: string
-  body: string
-  category: string
-  tags: string[]
-  thumbnailKeywords: string
-  internalLinks: string[]
-}
 
 export async function generatePostByKeyword(
   keyword: string
@@ -75,34 +68,5 @@ Markdown記法の本文と、キーワードを反映した共感的なストー
   })
 
   const raw = response.choices[0]?.message.content ?? ''
-
-  // 🔍 正規表現で各項目を抽出
-  const match = raw.match(
-    /■ タイトル\s*(.+?)\n+■ カテゴリ\s*(.+?)\n+■ 本文（Markdown）\s*([\s\S]+?)\n+■ サムネ画像キーワード\s*(.+?)\n+■ タグ\s*([\s\S]+?)\n+■ 推奨内部リンク\s*([\s\S]+)$/i
-  )
-
-  if (!match) {
-    throw new Error('OpenAIの出力形式が期待と異なります。')
-  }
-
-  const [, title, category, body, thumbnailKeywords, tagsRaw, linksRaw] = match
-
-  const tags = tagsRaw
-    .split(/,|\n|・|・/)
-    .map((t) => t.trim())
-    .filter((t) => t)
-
-  const internalLinks = linksRaw
-    .split(/\s|\n/)
-    .map((l) => l.trim())
-    .filter((l) => l.startsWith('/'))
-
-  return {
-    title: title.trim(),
-    body: body.trim(),
-    category: category.trim(),
-    thumbnailKeywords: thumbnailKeywords.trim(),
-    tags,
-    internalLinks,
-  }
+  return parseGeneratedPost(raw)
 }

@@ -1,13 +1,13 @@
 import { db } from '@/lib/firebase'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore'
 import { Post } from '@/types/post'
 
-export const getAllPosts = async (): Promise<Post[]> => {
+export const getPostsByTag = async (tag: string): Promise<Post[]> => {
   const q = query(
     collection(db, 'posts'),
-    orderBy('publishedAtTimestamp', 'desc') // ← ここを変更
+    where('tags', 'array-contains', tag),
+    orderBy('publishedAt', 'desc')
   )
-
   const snapshot = await getDocs(q)
 
   return snapshot.docs.map((doc) => ({

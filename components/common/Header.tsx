@@ -36,6 +36,15 @@ export const Header = () => {
           <Link href="/blog" className="hover:underline">
             ブログ
           </Link>
+          <Link href="/about" className="hover:underline">
+            キャラ紹介
+          </Link>
+          <Link href="/policy" className="hover:underline">
+            サイトポリシー
+          </Link>
+          <Link href="/faq" className="hover:underline">
+            よくある質問
+          </Link>
           {isAdmin ? (
             <Link
               href="/admin"
@@ -76,6 +85,27 @@ export const Header = () => {
             className="block"
           >
             ブログ
+          </Link>
+          <Link
+            href="/about"
+            onClick={() => setMenuOpen(false)}
+            className="block"
+          >
+            キャラ紹介
+          </Link>
+          <Link
+            href="/policy"
+            onClick={() => setMenuOpen(false)}
+            className="block"
+          >
+            サイトポリシー
+          </Link>
+          <Link
+            href="/faq"
+            onClick={() => setMenuOpen(false)}
+            className="block"
+          >
+            よくある質問
           </Link>
           {isAdmin ? (
             <Link

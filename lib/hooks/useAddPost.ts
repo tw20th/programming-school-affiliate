@@ -13,6 +13,7 @@ export function useAddPost() {
       ...fullPost,
       createdAt,
       publishedAt,
+      publishedAtTimestamp: scheduled.getTime(), // ← 補助フィールド追加
     })
   }
 
@@ -38,6 +39,7 @@ export function useAddPost() {
       thumbnailUrl: thumbnailUrl ?? '',
       createdAt: Timestamp.fromDate(now),
       publishedAt: Timestamp.fromDate(now),
+      publishedAtTimestamp: now.getTime(), // ← 補助フィールド追加
     })
   }
 

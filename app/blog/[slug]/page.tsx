@@ -1,9 +1,13 @@
+// app/blog/[slug]/page.tsx
+
 import { getPostBySlug } from '@/lib/firestore/getPostBySlug'
 import { getAllSlugs } from '@/lib/firestore/getAllSlugs'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { AuthorCard } from '@/components/blog/AuthorCard'
+import { Disclaimer } from '@/components/blog/Disclaimer'
 
 type Props = {
   params: { slug: string }
@@ -57,7 +61,6 @@ export default async function BlogBySlugPage({ params }: Props) {
   const post = await getPostBySlug(params.slug)
   if (!post) return notFound()
 
-  // 🔽 ここが追加部分：未来の投稿は非表示に
   if (
     post.publishedAt?.seconds &&
     post.publishedAt.seconds * 1000 > Date.now()
@@ -71,7 +74,6 @@ export default async function BlogBySlugPage({ params }: Props) {
 
   return (
     <main className="max-w-2xl mx-auto p-6">
-      {/* 以下はそのままでOK */}
       <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
 
       {post.thumbnailUrl && (
@@ -112,9 +114,26 @@ export default async function BlogBySlugPage({ params }: Props) {
         </>
       )}
 
-      <p className="text-sm text-gray-500 mb-1">カテゴリ: {post.category}</p>
+      <p className="text-sm text-gray-500 mb-1">
+        カテゴリ:{' '}
+        <a
+          href={`/blog/category/${encodeURIComponent(post.category)}`}
+          className="underline"
+        >
+          {post.category}
+        </a>
+      </p>
       <p className="text-sm text-gray-500 mb-4">
-        タグ: {post.tags?.join(', ')}
+        タグ:{' '}
+        {post.tags?.map((tag) => (
+          <a
+            key={tag}
+            href={`/blog/tag/${encodeURIComponent(tag)}`}
+            className="underline mr-2"
+          >
+            {tag}
+          </a>
+        ))}
       </p>
       <div className="text-sm text-gray-400 mb-6">
         投稿日: {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
@@ -123,6 +142,12 @@ export default async function BlogBySlugPage({ params }: Props) {
       <div className="prose max-w-none prose-blue">
         <ReactMarkdown>{post.body}</ReactMarkdown>
       </div>
+
+      {/* 🔽 追加ここから */}
+      <AuthorCard />
+      <Disclaimer />
+      {/* 🔼 追加ここまで */}
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -144,7 +169,7 @@ export default async function BlogBySlugPage({ params }: Props) {
               name: 'プログラミングスクール比較ブログ',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://yourdomain.com/logo.png', // あれば
+                url: 'https://yourdomain.com/logo.png',
               },
             },
           }),

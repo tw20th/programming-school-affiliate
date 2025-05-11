@@ -21,11 +21,9 @@ module.exports = {
     "/lib/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
   ],
-  plugins: [
-    "@typescript-eslint",
-    "import",
-  ],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
+    "max-len": ["error", {code: 100}], // ← 100文字まで許容
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
     "indent": ["error", 2],

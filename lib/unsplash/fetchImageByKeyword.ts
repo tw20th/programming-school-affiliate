@@ -1,4 +1,4 @@
-const accessKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY!
+const accessKey = process.env.UNSPLASH_ACCESS_KEY! // ← サーバー専用に
 
 export type UnsplashImage = {
   url: string
