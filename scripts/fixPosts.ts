@@ -30,7 +30,7 @@ async function fixPosts() {
 
   const updates = snapshot.docs.map(async (doc) => {
     const data = doc.data()
-    const updated: Record<string, any> = {}
+    const updated: Record<string, unknown> = {}
 
     // 1. slug 補完
     if (!data.slug || data.slug === '---') {

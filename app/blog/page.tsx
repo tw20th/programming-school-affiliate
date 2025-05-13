@@ -1,4 +1,4 @@
-// app/blog/page.tsx
+'use client'
 
 import { getAllPosts } from '@/lib/firestore/getAllPosts'
 import Link from 'next/link'
@@ -18,8 +18,21 @@ export default async function BlogPage() {
                 <p className="text-sm text-gray-500">{post.category}</p>
                 <p className="text-xs text-gray-400">
                   投稿日:{' '}
-                  {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
+                  {post.createdAt?.seconds
+                    ? new Date(
+                        post.createdAt.seconds * 1000
+                      ).toLocaleDateString('ja-JP')
+                    : '日付未定'}
                 </p>
+                {post.updatedAt?.seconds &&
+                  post.updatedAt.seconds !== post.createdAt?.seconds && (
+                    <p className="text-xs text-gray-400">
+                      最終更新日:{' '}
+                      {new Date(
+                        post.updatedAt.seconds * 1000
+                      ).toLocaleDateString('ja-JP')}
+                    </p>
+                  )}
               </div>
             </Link>
           </li>

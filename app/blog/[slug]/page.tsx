@@ -76,6 +76,23 @@ export default async function BlogBySlugPage({ params }: Props) {
     <main className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
 
+      {/* 投稿日と更新日 */}
+      <p className="text-sm text-gray-400 mb-1">
+        投稿日:{' '}
+        {post.createdAt?.seconds
+          ? new Date(post.createdAt.seconds * 1000).toLocaleDateString('ja-JP')
+          : '日付未定'}
+      </p>
+      {post.updatedAt?.seconds &&
+        post.updatedAt.seconds !== post.createdAt?.seconds && (
+          <p className="text-sm text-gray-400 mb-4">
+            最終更新日:{' '}
+            {new Date(post.updatedAt.seconds * 1000).toLocaleDateString(
+              'ja-JP'
+            )}
+          </p>
+        )}
+
       {post.thumbnailUrl && (
         <>
           <Image
@@ -135,9 +152,6 @@ export default async function BlogBySlugPage({ params }: Props) {
           </a>
         ))}
       </p>
-      <div className="text-sm text-gray-400 mb-6">
-        投稿日: {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
-      </div>
 
       <div className="prose max-w-none prose-blue">
         <ReactMarkdown>{post.body}</ReactMarkdown>
